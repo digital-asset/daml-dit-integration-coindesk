@@ -1,0 +1,69 @@
+-- Copyright (c) 2014-2020, Digital Asset (Switzerland) GmbH and/or its affiliates.
+-- SPDX-License-Identifier: Apache-2.0
+
+daml 1.2
+
+module CoinDesk.PriceRequest where
+
+
+template PriceRequest
+  with
+    integrationParty : Party
+    currencyCode     : Text
+    continuationId   : Int
+  where
+    signatory integrationParty
+
+    controller integrationParty can
+      PriceRequest_RespondSuccess: ContractId PriceResponseSuccess
+        with
+          updatedAt : Time
+          rate      : Decimal
+        do
+          create PriceResponseSuccess with
+            integrationParty
+            currencyCode
+            continuationId
+            updatedAt = updatedAt
+            rate = rate
+
+      PriceRequest_RespondFailure: ContractId PriceResponseFailure
+        with
+          httpStatusCode   : Int
+          httpResponseBody : Text
+        do
+          create PriceResponseFailure with
+            integrationParty
+            currencyCode
+            continuationId
+            httpStatusCode = httpStatusCode
+            httpResponseBody = httpResponseBody
+
+
+template PriceResponseSuccess
+  with
+    integrationParty : Party
+    currencyCode     : Text
+    continuationId   : Int
+    updatedAt        : Time
+    rate             : Decimal
+  where
+    signatory integrationParty
+
+template PriceResponseFailure
+  with
+    integrationParty : Party
+    currencyCode     : Text
+    continuationId   : Int
+    httpStatusCode   : Int
+    httpResponseBody : Text
+  where
+    signatory integrationParty
+
+    controller integrationParty can
+      PriceResponseFailure_RetryRequest : ContractId PriceRequest
+        do
+          create PriceRequest with
+            integrationParty
+            currencyCode
+            continuationId

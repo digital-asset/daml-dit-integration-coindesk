@@ -1,0 +1,57 @@
+-- Copyright (c) 2014-2020, Digital Asset (Switzerland) GmbH and/or its affiliates.
+-- SPDX-License-Identifier: Apache-2.0
+
+daml 1.2
+
+module CoinDesk.PriceOracle where
+
+template CurrentPriceOracle
+  with
+    integrationParty : Party
+    currencyCode     : Text
+    updatedAt        : Time
+    rate             : Decimal
+  where
+    signatory integrationParty
+
+    key (integrationParty, currencyCode) : (Party, Text)
+    maintainer key._1
+
+    controller integrationParty can
+      CurrentPriceOracle_Update : ContractId CurrentPriceOracle
+        with
+          newUpdatedAt : Time
+          newRate      : Decimal
+        do
+          create CurrentPriceOracle with
+            integrationParty
+            currencyCode
+            updatedAt=newUpdatedAt
+            rate=newRate
+
+template CurrentPriceOracleUpdater
+  with
+    integrationParty : Party
+  where
+    signatory integrationParty
+
+    controller integrationParty can
+      CurrentPriceOracleUpdater_Update : ContractId CurrentPriceOracle
+        with
+           currencyCode     : Text
+           updatedAt        : Time
+           rate             : Decimal
+        do
+          currentCid <- lookupByKey @CurrentPriceOracle (integrationParty, currencyCode)
+
+          case currentCid of
+            Some cid ->
+              do
+                current <- fetch cid
+                exercise cid CurrentPriceOracle_Update with
+                  newUpdatedAt=updatedAt
+                  newRate=rate
+            None ->
+              create CurrentPriceOracle with
+                integrationParty
+                ..

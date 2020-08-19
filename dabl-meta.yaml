@@ -1,0 +1,37 @@
+## Copyright (c) 2020, Digital Asset (Switzerland) GmbH and/or its affiliates.
+## SPDX-License-Identifier: Apache-2.0
+
+catalog:
+    name: dabl-integration-coindesk
+    group_id: com.digitalasset
+    version: 0.5.1
+    short_description: CoinDesk Integrations
+    description: BTC Price Queries
+    release_date: 2020-08-13
+    author: Digital Asset (Switzerland) GmbH
+    license: Apache-2.0
+    tags: [ integration ]
+subdeployments:
+    - dabl-integration-coindesk.dar
+integration_types:
+    - id: com.projectdabl.integrations.coindesk.price_request
+      name: CoinDesk Price Query
+      description: Queries CoinDesk for the price of BTC in a specific unit of currency.
+      entrypoint: core_int.integration_coindesk_price:integration_coindesk_price_request_main
+      runtime: python-direct
+      fields: []
+    - id: com.projectdabl.integrations.coindesk.oracle
+      name: CoinDesk Price Oracle
+      description: Periodically queries CoinDesk for the price of BTC in a specific unit of currency and updates a CurrentPrice contract on the ledger with that price.
+      entrypoint: core_int.integration_coindesk_price:integration_coindesk_price_oracle_main
+      env_class: core_int.integration_coindesk_price:IntegrationCoinDeskPriceOracleEnv
+      runtime: python-direct
+      fields:
+          - id: currencyCode
+            name: Currency Code
+            description: Currency code of oracle to create
+            field_type: text
+          - id: updatePeriod
+            name: Update Period (sec.)
+            description: Oracle update period in seconds.
+            field_type: text
