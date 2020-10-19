@@ -14,7 +14,7 @@ from dazl import create_and_exercise, exercise
 from dazl.model.core import ContractData
 
 from daml_dit_api import \
-    IntegrationEnvironment, IntegrationEvents, is_true
+    IntegrationEnvironment, IntegrationEvents
 
 
 LOG = logging.getLogger('integration')

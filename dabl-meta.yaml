@@ -11,8 +11,6 @@ catalog:
     license: Apache-2.0
     tags: [ integration ]
     icon_file: coindesk-icon.png
-subdeployments:
-    - dabl-integration-coindesk.dar
 integration_types:
     - id: com.projectdabl.integrations.coindesk.price_request
       name: CoinDesk Price Query
