@@ -14,7 +14,7 @@ publish: ${DIT_NAME}
 	ddit release
 
 ${DIT_NAME}: dabl-meta.yaml Makefile ${PKG_FILES} ${SRC_FILES} requirements.txt
-	ddit build --force
+	ddit build --force --integration
 
 clean:
 	rm -fr ${DIT_NAME} .daml dist *~ pkg/*~
