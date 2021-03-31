@@ -1,0 +1,11 @@
+-- Copyright (c) 2014-2021, Digital Asset (Switzerland) GmbH and/or its affiliates.
+-- SPDX-License-Identifier: Apache-2.0
+
+module CoinDesk.PriceData where
+
+data MarketPrice = MarketPrice
+  with
+    currencyCode     : Text
+    updatedAt        : Time
+    rate             : Decimal
+  deriving (Eq, Show)

@@ -1,48 +1,45 @@
--- Copyright (c) 2014-2020, Digital Asset (Switzerland) GmbH and/or its affiliates.
+-- Copyright (c) 2014-2021, Digital Asset (Switzerland) GmbH and/or its affiliates.
 -- SPDX-License-Identifier: Apache-2.0
-
-daml 1.2
 
 module CoinDesk.PriceOracle where
 
-template CurrentPriceOracle
+import CoinDesk.PriceData
+
+template PriceOraclePrice
   with
     integrationParty : Party
-    currencyCode     : Text
-    updatedAt        : Time
-    rate             : Decimal
+    price            : MarketPrice
   where
     signatory integrationParty
 
-    key (integrationParty, currencyCode) : (Party, Text)
+    key (integrationParty, price.currencyCode) : (Party, Text)
     maintainer key._1
 
     controller integrationParty can
-      CurrentPriceOracle_Update : ContractId CurrentPriceOracle
+      CurrentPriceOracle_Update : ContractId PriceOraclePrice
         with
-          newUpdatedAt : Time
+          newUpdatedAt : Time 
           newRate      : Decimal
         do
-          create CurrentPriceOracle with
-            integrationParty
-            currencyCode
-            updatedAt=newUpdatedAt
-            rate=newRate
+          create this with 
+            price = price with
+              updatedAt = newUpdatedAt
+              rate = newRate
 
-template CurrentPriceOracleUpdater
+template PriceOracleRequest
   with
     integrationParty : Party
+    currencyCode : Text
   where
     signatory integrationParty
 
     controller integrationParty can
-      CurrentPriceOracleUpdater_Update : ContractId CurrentPriceOracle
+      nonconsuming CurrentPriceOracleUpdater_Update : ContractId PriceOraclePrice
         with
-           currencyCode     : Text
            updatedAt        : Time
            rate             : Decimal
         do
-          currentCid <- lookupByKey @CurrentPriceOracle (integrationParty, currencyCode)
+          currentCid <- lookupByKey @PriceOraclePrice (integrationParty, currencyCode)
 
           case currentCid of
             Some cid ->
@@ -52,6 +49,6 @@ template CurrentPriceOracleUpdater
                   newUpdatedAt=updatedAt
                   newRate=rate
             None ->
-              create CurrentPriceOracle with
+              create PriceOraclePrice with
                 integrationParty
-                ..
+                price = MarketPrice with ..
