@@ -1,10 +1,9 @@
--- Copyright (c) 2014-2020, Digital Asset (Switzerland) GmbH and/or its affiliates.
+-- Copyright (c) 2014-2021, Digital Asset (Switzerland) GmbH and/or its affiliates.
 -- SPDX-License-Identifier: Apache-2.0
-
-daml 1.2
 
 module CoinDesk.PriceRequest where
 
+import CoinDesk.PriceData
 
 template PriceRequest
   with
@@ -22,10 +21,8 @@ template PriceRequest
         do
           create PriceResponseSuccess with
             integrationParty
-            currencyCode
             continuationId
-            updatedAt = updatedAt
-            rate = rate
+            price = MarketPrice with ..
 
       PriceRequest_RespondFailure: ContractId PriceResponseFailure
         with
@@ -43,10 +40,8 @@ template PriceRequest
 template PriceResponseSuccess
   with
     integrationParty : Party
-    currencyCode     : Text
     continuationId   : Int
-    updatedAt        : Time
-    rate             : Decimal
+    price            : MarketPrice
   where
     signatory integrationParty
 
