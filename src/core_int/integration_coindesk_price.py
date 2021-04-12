@@ -52,9 +52,25 @@ async def issue_coindesk_request(currencyCode):
                 }
 
 
-def integration_coindesk_price_request_main(
+async def update_oracle_commands(cid, currencyCode: str):
+    LOG.debug('update_oracle_commands: %r, %r', cid, currencyCode)
+    resp = await issue_coindesk_request(currencyCode)
+
+    if resp['success']:
+        return [exercise(cid, 'CurrentPriceOracleUpdater_Update', {
+            'updatedAt': resp['updatedAt'],
+            'rate': resp['rate']
+        })]
+    else:
+        LOG.error('Invalid coindesk response (status: %r, body: %r)',
+                  resp['httpStatusCode'], resp['httpResponseBody'])
+        return []
+
+def integration_coindesk_main(
         env: 'IntegrationEnvironment',
         events: 'IntegrationEvents'):
+
+    # Request/Response style integration
 
     @events.ledger.contract_created('CoinDesk.PriceRequest:PriceRequest')
     async def on_contract_created(event):
@@ -75,24 +91,7 @@ def integration_coindesk_price_request_main(
                 'httpResponseBody': resp['httpResponseBody']
             })
 
-
-async def update_oracle_commands(cid, currencyCode: str):
-    LOG.debug('update_oracle_commands: %r, %r', cid, currencyCode)
-    resp = await issue_coindesk_request(currencyCode)
-
-    if resp['success']:
-        return [exercise(cid, 'CurrentPriceOracleUpdater_Update', {
-            'updatedAt': resp['updatedAt'],
-            'rate': resp['rate']
-        })]
-    else:
-        LOG.error('Invalid coindesk response (status: %r, body: %r)',
-                  resp['httpStatusCode'], resp['httpResponseBody'])
-        return []
-
-def integration_coindesk_price_oracle_main(
-        env: 'IntegrationEnvironment',
-        events: 'IntegrationEvents'):
+    # Oracle style integration
 
     active_oracles = {}
 
@@ -111,7 +110,7 @@ def integration_coindesk_price_oracle_main(
         LOG.debug('Archived oracle request contract: %r', event.cid)
         active_oracles.pop(event.cid, None)
 
-    @events.time.periodic_interval(30)
+    @events.time.periodic_interval(30, label='Poll CoinDesk')
     async def poll_coindesk():
 
         cmds = []
