@@ -10,7 +10,7 @@ from datetime import datetime
 
 from aiohttp import ClientSession
 
-from dazl import create_and_exercise, exercise
+from dazl import exercise
 from dazl.model.core import ContractData
 
 from daml_dit_if.api import \
@@ -105,7 +105,7 @@ def integration_coindesk_main(
 
         return await update_oracle_commands(event.cid, currencyCode)
 
-    @events.ledger.contract_archived('CoinDesk.PriceOracle.PriceOracleRequest')
+    @events.ledger.contract_archived('CoinDesk.PriceOracle:PriceOracleRequest')
     async def on_ledger_archived(event):
         LOG.debug('Archived oracle request contract: %r', event.cid)
         active_oracles.pop(event.cid, None)
