@@ -4,7 +4,7 @@
 catalog:
     name: dabl-integration-coindesk
     group_id: com.digitalasset
-    version: 0.7.5
+    version: 0.8.0
     short_description: CoinDesk
     description: BTC Price Queries
     author: Digital Asset (Switzerland) GmbH
