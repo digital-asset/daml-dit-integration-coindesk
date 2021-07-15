@@ -4,17 +4,19 @@
 catalog:
     name: dabl-integration-coindesk
     group_id: com.digitalasset
-    version: 0.8.0
+    version: 0.8.1
     short_description: CoinDesk
     description: BTC Price Queries
     author: Digital Asset (Switzerland) GmbH
     license: Apache-2.0
     tags: [ integration ]
     icon_file: coindesk-icon.png
+    source_url: https://github.com/digital-asset/daml-dit-integration-coindesk
 integration_types:
     - id: com.projectdabl.integrations.coindesk.btc_price
       name: CoinDesk Price
       description: Request/Response and Periodic CoinDesk queries for the price of BTC.
+      instance_template: CoinDesk.PriceOracle:PriceOracleRequest
       entrypoint: core_int.integration_coindesk_price:integration_coindesk_main
       runtime: python-direct
       fields: []
