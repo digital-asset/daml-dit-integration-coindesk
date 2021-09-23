@@ -1,9 +1,9 @@
 ## Copyright (c) 2020, Digital Asset (Switzerland) GmbH and/or its affiliates.
 ## SPDX-License-Identifier: Apache-2.0
 
-sdk-version: 1.11.1
+sdk-version: 1.16.0
 name: dabl-integration-coindesk
-version: 1.1.0
+version: 1.1.1
 source: daml/Modules.daml
 dependencies:
 - daml-prim
