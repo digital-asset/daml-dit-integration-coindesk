@@ -1,6 +1,7 @@
 # Copyright (c) 2020, Digital Asset (Switzerland) GmbH and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 
+import os
 import asyncio
 import logging
 
@@ -10,6 +11,7 @@ from datetime import datetime
 
 from aiohttp import ClientSession
 
+import dazl
 from dazl import exercise
 from dazl.model.core import ContractData
 
@@ -71,6 +73,26 @@ def integration_coindesk_main(
         events: 'IntegrationEvents'):
 
     # Request/Response style integration
+
+    @events.ledger.ledger_ready()
+    async def ledger_ready():
+        get_ledger_events()
+        LOG.info(f'the public party is {os.getenv("DABL_PUBLIC_PARTY")}')
+
+    def get_ledger_events():
+        LOG.info(f'Getting active events from the ledger')
+        try:
+            public = os.getenv("DABL_PUBLIC_PARTY") or "public-party"
+            active_ledger_events = []
+            with dazl.connect(url=os.getenv('DABL_LEDGER_URL'), read_as=dazl.Party(public), blocking=True) as conn:
+                with conn.query('CoinDesk.PriceOracle:PriceOracleRequest') as stream:
+                    for event in stream.creates():
+                        LOG.info(f"SAW AN EVENT AS PUBLIC: {event.payload}")
+            return active_ledger_events
+        except Exception as e:
+            LOG.error(f"Can't load active events from the ledger due to {str(e)} error")
+            return []
+
 
     @events.ledger.contract_created('CoinDesk.PriceRequest:PriceRequest')
     async def on_contract_created(event):
