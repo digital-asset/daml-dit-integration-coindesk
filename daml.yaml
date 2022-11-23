@@ -5,6 +5,9 @@ sdk-version: 1.18.3
 name: dabl-integration-coindesk
 version: 1.1.2
 source: daml/Modules.daml
+parties:
+  - Alice
+  - Bob
 dependencies:
 - daml-prim
 - daml-stdlib

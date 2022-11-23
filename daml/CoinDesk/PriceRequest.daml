@@ -5,6 +5,20 @@ module CoinDesk.PriceRequest where
 
 import CoinDesk.PriceData
 
+template FailureTest
+  with
+    integrationParty : Party
+  where
+    signatory integrationParty
+    controller integrationParty can
+      FailureTest_Fail : ()
+        do
+          assert False
+          return ()
+      FailureTest_Succeed : ()
+        do
+          return ()
+
 template PriceRequest
   with
     integrationParty : Party

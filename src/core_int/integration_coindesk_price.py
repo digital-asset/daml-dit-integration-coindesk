@@ -14,7 +14,7 @@ from dazl import exercise
 from dazl.model.core import ContractData
 
 from daml_dit_if.api import \
-    IntegrationEnvironment, IntegrationEvents
+    IntegrationEnvironment, IntegrationEvents, IntegrationResponse
 
 
 LOG = logging.getLogger('integration')
@@ -72,9 +72,30 @@ def integration_coindesk_main(
 
     # Request/Response style integration
 
+    @events.queue.message("contract_errors")
+    async def on_message(msg):
+        event = msg['event']
+        exception = msg['exception']
+        commands = msg['commands']
+        LOG.info(f'Handling error queue for {event} with exception {exception}...')
+        return commands
+
+    @events.ledger.contract_created('CoinDesk.PriceRequest:FailureTest')
+    async def on_contract_created(event):
+
+        async def handle_error(e: Exception):
+            LOG.info(f"Hit an exception: {e}!")
+            commands = [exercise(event.cid, 'FailureTest_Succeed', {})]
+            await env.queue.put({"event": event, "exception": e, "commands": commands}, "contract_errors")
+
+        return IntegrationResponse(
+                commands=[exercise(event.cid, 'FailureTest_Fail', {})],
+                error_handler=handle_error
+            )
+
     @events.ledger.contract_created('CoinDesk.PriceRequest:PriceRequest')
     async def on_contract_created(event):
-        LOG.debug('Noticed new price request: %r', event)
+        LOG.info('Noticed new price request: %r', event)
 
         currencyCode = event.cdata['currencyCode']
 
