@@ -16,6 +16,8 @@ from dazl.model.core import ContractData
 from daml_dit_if.api import \
     IntegrationEnvironment, IntegrationEvents
 
+from prometheus_client import Gauge
+
 
 LOG = logging.getLogger('integration')
 
@@ -71,6 +73,13 @@ def integration_coindesk_main(
         events: 'IntegrationEvents'):
 
     # Request/Response style integration
+
+    test_gauge = Gauge("test_guage", "My Test Gauge")
+    test_gauge.inc()
+    test_gauge.inc()
+    test_gauge.inc()
+    test_gauge.inc()
+    test_gauge.inc()
 
     @events.ledger.contract_created('CoinDesk.PriceRequest:PriceRequest')
     async def on_contract_created(event):

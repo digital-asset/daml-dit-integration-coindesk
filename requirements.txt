@@ -1,0 +1,3 @@
+dazl[oauth]
+prometheus-client
+daml_dit_if
